@@ -1,16 +1,29 @@
-## Hi there 👋
+# 👋 Hi, I’m **John Raymon**
 
-<!--
-**Raymon0527/Raymon0527** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+## 🚀 About Me
+- 🎓 Computer Engineering Student 
+- 💡 Passionate about IoT, AI, and Web Development  
+- 🌱 Currently learning **Flutter & MicroPython**  
+- 🎯 Goal: Building smart, automated, and impactful solutions  
 
-Here are some ideas to get you started:
+---
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## 🛠️ Tech Stack
+- 💻 Languages: Python, Java, C++, HTML/CSS  
+- 🔧 Tools & Platforms: ESP32, Raspberry Pi, Arduino, Firebase, Arduino, Flutter 
+- 🧩 Interests: IoT Automation, AI Models, Web & Mobile Apps  
+
+---
+
+## 📌 Featured Projects
+- 📂
+---
+
+## 📫 Let’s Connect
+- 💼 [LinkedIn](#)  
+- 🐦 [Twitter/X](#)  
+- 🌐 [Portfolio](#)  
+
+---
+
+✨ *“Code with purpose. Build with passion. Share with impact.”* ✨
