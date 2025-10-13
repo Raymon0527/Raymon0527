@@ -10,8 +10,8 @@
 
 ## 🛠️ Tech Stack
 - 💻 Languages: Python, Java, C++, HTML/CSS  
-- 🔧 Tools & Platforms: ESP32, Raspberry Pi, Arduino, Firebase, Arduino, Flutter 
-- 🧩 Interests: IoT Automation, AI Models, Web & Mobile Apps  
+- 🔧 Tools & Platforms: ESP 8266, ESP32, Raspberry Pi, Arduino, Firebase, Arduino, Flutter 
+- 🧩 Interests: IoT Automation, AI Models, Web Development  
 
 ---
 
