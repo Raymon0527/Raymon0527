@@ -7,17 +7,17 @@ import os
 MODEL_PATH = "model/anomaly_detector.pkl"
 DATA_PATH = "model/training_data.npy"
 
-# ✅ Load or initialize model
+# Load or initialize model
 if os.path.exists(MODEL_PATH):
     model = joblib.load(MODEL_PATH)
 else:
-    print("⚠️ No saved model found — training new IsolationForest model.")
+    print(" No saved model found — training new IsolationForest model.")
     X_train = np.array([[70, 0.1], [72, 0.2], [75, 0.05], [80, 0.1]])
     model = IsolationForest(contamination=0.1, random_state=42)
     model.fit(X_train)
     joblib.dump(model, MODEL_PATH)
 
-# ✅ Load or initialize training data
+#  Load or initialize training data
 if os.path.exists(DATA_PATH):
     X_data = np.load(DATA_PATH)
 else:
@@ -43,4 +43,4 @@ def retrain_model():
     model = IsolationForest(contamination=0.1, random_state=42)
     model.fit(X_data)
     joblib.dump(model, MODEL_PATH)
-    print(f"✅ Model retrained on {len(X_data)} samples.")
+    print(f" Model retrained on {len(X_data)} samples.")
