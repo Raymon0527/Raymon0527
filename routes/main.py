@@ -1,14 +1,12 @@
+# app/main.py
 from fastapi import FastAPI
-from app.services.ai_module import detect_anomaly
+from app.routes import anomaly_detection
 
-app = FastAPI(title="Anomaly Detection Demo")
+app = FastAPI(
+    title="Heart Rate & Motion Anomaly Detection API",
+    description="Detects abnormal patterns in heart rate and motion data using Isolation Forest.",
+    version="1.0.0"
+)
 
-@app.post("/check_heart_rate")
-def check_heart_rate(data: dict):
-    heart_rate = data["heart_rate"]
-    motion = data["motion"]
-
-    # Just print result in console
-    detect_anomaly(heart_rate, motion)
-
-    return {"status": "Processed — check console for output."}
+# Register the anomaly detection router
+app.include_router(anomaly_detection.router)
