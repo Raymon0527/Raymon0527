@@ -1,36 +1,89 @@
-# app/routes/anomaly_detection.py
-from fastapi import APIRouter
-from app.services.ai_module import detect_anomaly, add_training_data, retrain_model
 
-router = APIRouter(
-    prefix="/anomaly",      # group all endpoints under /anomaly
-    tags=["Anomaly Detection"]
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import IsolationForest
+
+# -------------------------------
+# File Configuration
+# -------------------------------
+CSV_FILE = "cleaned_integrated_heart_motion.csv"   # Integrated CSV file
+OUTPUT_FILE = "connected_anomalies.csv"            # Output file name
+
+# -------------------------------
+# Load Integrated CSV File
+# -------------------------------
+try:
+    data = pd.read_csv(CSV_FILE)
+    print(" Integrated CSV file loaded successfully!")
+except FileNotFoundError:
+    raise SystemExit(
+        f" File not found: {CSV_FILE}\n"
+        "➡ Please make sure 'cleaned_integrated_heart_motion.csv' is in the same folder as this script."
+    )
+
+# -------------------------------
+# Validate Columns
+# -------------------------------
+expected_cols = {"heart_rate", "motion"}
+if not expected_cols.issubset(data.columns):
+    raise ValueError(f" The file must contain these columns: {expected_cols}")
+
+# Clean numeric data
+data["heart_rate"] = pd.to_numeric(data["heart_rate"], errors="coerce")
+data["motion"] = pd.to_numeric(data["motion"], errors="coerce")
+data.dropna(subset=["heart_rate", "motion"], inplace=True)
+
+print(f" Data cleaned successfully. Total records: {len(data)}")
+
+# -------------------------------
+# Hybrid Anomaly Detection
+# -------------------------------
+# Rule-based Heart Rate Anomalies
+data["Heart_Anomaly"] = np.where(
+    (data["heart_rate"] < 60) | (data["heart_rate"] > 100), "Yes", "No"
 )
 
-@router.post("/check")
-def check_anomaly(data: dict):
-    """
-    Check if the given heart rate and motion values indicate an anomaly.
-    Automatically logs data for retraining.
-    """
-    heart_rate = data["heart_rate"]
-    motion = data["motion"]
+# AI-based Motion Anomalies (Isolation Forest)
+model = IsolationForest(contamination=0.05, random_state=42)
+model.fit(data[["motion"]])
+motion_pred = model.predict(data[["motion"]])
+data["Motion_Anomaly"] = np.where(motion_pred == -1, "Yes", "No")
 
-    is_anomaly = detect_anomaly(heart_rate, motion)
+# Combine Both
+data["Anomaly"] = np.where(
+    (data["Heart_Anomaly"] == "Yes") | (data["Motion_Anomaly"] == "Yes"),
+    "Yes", "No"
+)
 
-    # Store data for future retraining
-    add_training_data(heart_rate, motion)
+# -------------------------------
+# Visualization
+# -------------------------------
+plt.figure(figsize=(8, 5))
+plt.scatter(
+    data.loc[data["Anomaly"] == "No", "heart_rate"],
+    data.loc[data["Anomaly"] == "No", "motion"],
+    color="gray", s=30, alpha=0.6, label="Normal Data"
+)
+plt.scatter(
+    data.loc[data["Anomaly"] == "Yes", "heart_rate"],
+    data.loc[data["Anomaly"] == "Yes", "motion"],
+    color="red", s=60, alpha=0.9, label="Anomalies"
+)
+plt.title("Integrated Heart Rate and Motion — Anomaly Detection", fontsize=12)
+plt.xlabel("Heart Rate (BPM)")
+plt.ylabel("Motion Magnitude")
+plt.legend()
+plt.grid(True, linestyle="--", alpha=0.6)
+plt.tight_layout()
+plt.show()
 
-    return {
-        "heart_rate": heart_rate,
-        "motion": motion,
-        "anomaly_detected": is_anomaly
-    }
+# -------------------------------
+# Summary and Output
+# -------------------------------
+total_anomalies = (data["Anomaly"] == "Yes").sum()
+print(f"\n Total Data Points: {len(data)}")
+print(f" Anomalies Detected: {total_anomalies}")
 
-@router.post("/retrain")
-def retrain_anomaly_model():
-    """
-    Retrain the Isolation Forest model using stored training data.
-    """
-    retrain_model()
-    return {"message": " Model retrained successfully using latest data."}
+data.to_csv(OUTPUT_FILE, index=False)
+print(f" Connected and analyzed data saved to '{OUTPUT_FILE}'")
