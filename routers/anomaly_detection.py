@@ -5,7 +5,7 @@ from sklearn.ensemble import IsolationForest
 
 # File Configuration
 CSV_FILE = "cleaned_integrated_heart_motion.csv"   # Integrated CSV file
-OUTPUT_FILE = "connected_anomalies.csv"            # Output file name
+OUTPUT_FILE = "detected_anomalies.csv"            # Output file name
 
 
 # Load Integrated CSV File
