@@ -56,9 +56,7 @@ data["Anomaly_Type"] = data.apply(anomaly_type, axis=1)
 # Compute Motion Magnitude
 data["motion_magnitude"] = np.sqrt(data["X"]**2 + data["Y"]**2 + data["Z"]**2)
 
-# -----------------------------
 # Visualization with Count Table
-# -----------------------------
 plt.figure(figsize=(10, 6))
 
 # Normal
