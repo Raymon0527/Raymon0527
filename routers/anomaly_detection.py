@@ -9,7 +9,7 @@ OUTPUT_FILE = "detected_anomalies.csv"
 # Load CSV
 try:
     data = pd.read_csv(CSV_FILE)
-    print(" CSV loaded successfully!")
+    print("CSV loaded successfully!")
 except FileNotFoundError:
     raise SystemExit(f" File not found: {CSV_FILE}")
 
@@ -40,47 +40,83 @@ data["Motion_Anomaly"] = np.where(
     "Yes", "No"
 )
 
-# Combined Anomaly
-data["Anomaly"] = np.where(
-    (data["Heart_Anomaly"] == "Yes") | (data["Motion_Anomaly"] == "Yes"),
-    "Yes", "No"
-)
+# Corrected Anomaly Classification
+def anomaly_type(row):
+    if row["Heart_Anomaly"] == "Yes" and row["Motion_Anomaly"] == "Yes":
+        return "Both"
+    elif row["Heart_Anomaly"] == "Yes" and row["Motion_Anomaly"] == "No":
+        return "Heart Only"
+    elif row["Heart_Anomaly"] == "No" and row["Motion_Anomaly"] == "Yes":
+        return "Motion Only"
+    else:
+        return "Normal"
+
+data["Anomaly_Type"] = data.apply(anomaly_type, axis=1)
 
 # Compute Motion Magnitude
 data["motion_magnitude"] = np.sqrt(data["X"]**2 + data["Y"]**2 + data["Z"]**2)
 
-# Visualization
+# -----------------------------
+# Visualization with Count Table
+# -----------------------------
 plt.figure(figsize=(10, 6))
 
-# Normal Data
+# Normal
 plt.scatter(
-    data.loc[data["Anomaly"] == "No", "heart_rate"],
-    data.loc[data["Anomaly"] == "No", "motion_magnitude"],
-    color="gray", s=30, alpha=0.6, label="Normal"
+    data.loc[data["Anomaly_Type"] == "Normal", "heart_rate"],
+    data.loc[data["Anomaly_Type"] == "Normal", "motion_magnitude"],
+    color="lightgreen", s=50, alpha=0.9, label="Normal"
 )
 
-# Anomalies
+# Heart Only
 plt.scatter(
-    data.loc[data["Anomaly"] == "Yes", "heart_rate"],
-    data.loc[data["Anomaly"] == "Yes", "motion_magnitude"],
-    color="red", s=60, alpha=0.9, label="Anomaly"
+    data.loc[data["Anomaly_Type"] == "Heart Only", "heart_rate"],
+    data.loc[data["Anomaly_Type"] == "Heart Only", "motion_magnitude"],
+    color="blue", s=60, alpha=0.8, label="Heart Only"
 )
 
-plt.title("Heart Rate & Motion Rule-Based Anomaly Detection", fontsize=14)
+# Motion Only
+plt.scatter(
+    data.loc[data["Anomaly_Type"] == "Motion Only", "heart_rate"],
+    data.loc[data["Anomaly_Type"] == "Motion Only", "motion_magnitude"],
+    color="orange", s=60, alpha=0.8, label="Motion Only"
+)
+
+# Both Anomalies
+plt.scatter(
+    data.loc[data["Anomaly_Type"] == "Both", "heart_rate"],
+    data.loc[data["Anomaly_Type"] == "Both", "motion_magnitude"],
+    color="red", s=80, alpha=0.9, label="Both"
+)
+
+plt.title("Heart Rate & Motion Anomaly Detection", fontsize=14)
 plt.xlabel("Heart Rate (BPM)")
 plt.ylabel("Motion Magnitude (g)")
-plt.legend()
 plt.grid(True, linestyle="--", alpha=0.6)
+plt.legend()
+
+# Add Count Table
+summary = data["Anomaly_Type"].value_counts()
+table_text = "\n".join([f"{k}: {v}" for k, v in summary.items()])
+
+# Place the table in the top-right corner
+plt.gca().text(
+    0.98, 0.98, table_text,
+    horizontalalignment='right',
+    verticalalignment='top',
+    transform=plt.gca().transAxes,
+    fontsize=10,
+    bbox=dict(facecolor='white', alpha=0.8, edgecolor='black')
+)
+
 plt.tight_layout()
 plt.show()
 
-# Summary & Output# -----------------------------
-total_anomalies = (data["Anomaly"] == "Yes").sum()
-print(f"\nTotal Records: {len(data)}")
-print(f"Total Anomalies Detected: {total_anomalies}")
-print(f" - Heart Rate Anomalies: {(data['Heart_Anomaly'] == 'Yes').sum()}")
-print(f" - Motion Anomalies: {(data['Motion_Anomaly'] == 'Yes').sum()}")
+# Summary & Output
+summary = data["Anomaly_Type"].value_counts()
+print("\nAnomaly Summary:")
+print(summary)
 
 # Save CSV
 data.to_csv(OUTPUT_FILE, index=False)
-print(f" Analysis saved to '{OUTPUT_FILE}'")
+print(f"\n Analysis saved to '{OUTPUT_FILE}'")
